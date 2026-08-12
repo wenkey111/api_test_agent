@@ -1,0 +1,29 @@
+[project]
+name = "interface-test-self-healing-agent"
+version = "0.1.0"
+description = "基于 LangGraph 多智能体的接口测试自愈 Agent"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=0.3",
+    "langchain-community>=0.3",
+    "langchain-ollama>=0.2",
+    "langgraph>=0.2",
+    "langgraph-checkpoint-sqlite>=2.0",
+    "streamlit>=1.40",
+    "fastmcp>=0.2",
+    "mcp>=1.0",
+    "pydantic>=2.0",
+    "requests>=2.32",
+    "pyyaml>=6.0",
+    "flask>=3.0",
+    "pytest>=8.0",
+]
+
+[project.optional-dependencies]
+observability = [
+    "langsmith>=0.1",
+]
+
+[tool.streamlit]
+configuration = "streamlit run final_agent.py"

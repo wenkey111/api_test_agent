@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# SQLite databases (runtime state)
+*.sqlite
+*.sqlite3
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+.DS_Store
+.DS_Store?
+._*
+Spotlight-V100
+.Trashes
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# Test cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Swagger UI vendored - ignore internal git/node artifacts
+swagger_openapi/swagger-ui/swagger-ui-*/.git/
+swagger_openapi/swagger-ui/swagger-ui-*/node_modules/
+swagger_openapi/swagger-ui/swagger-ui-*/.npm/
