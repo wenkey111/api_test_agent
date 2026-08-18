@@ -76,7 +76,7 @@ def render_ui(app):
             config = {"configurable": {"thread_id": st.session_state.thread_id}, "recursion_limit": 100}
 
             with st.status("🏢 Management in progress...", expanded=True) as status:
-                events = app.stream({"messages": [("user", prompt)], "requirement": prompt}, config)
+                events = app.stream({"messages": [("user", prompt)], "requirement": prompt}, config, stream_mode="updates")
 
                 for event in events:
                     # 1. Detect who is acting based on the key in the event

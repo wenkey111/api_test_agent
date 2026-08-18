@@ -72,6 +72,8 @@ set LANGCHAIN_TRACING_V2=true
 set LANGCHAIN_API_KEY=your-api-key
 ```
 
-## 内嵌 Skill
+默认在 tracing 的 default 项目下查看，可自行建项目并加上 `set LANGCHAIN_PROJECT=你的项目名`。
 
-`.claude/skills/semgrep-scan/` 提供 Semgrep Pro SAST 扫描能力，只读，不修改源码。在 Claude Code 中用 `/semgrep-scan` 调用。
+## Skills
+
+skill 文件夹仅为结构需要，可自行添加配置。

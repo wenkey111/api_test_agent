@@ -6,9 +6,9 @@ def test_login():
     resp = requests.post(f'{BASE_URL}/user/login', json={'username': 'test01', 'password': '123456'})
     assert resp.status_code == 200
     data = resp.json()
-    # 修复：断言msg的值为'登录成功'
+    # 根据报错日志，调整断言为data['message']
     assert data['code'] == 200
-    assert data['msg'] == '登录成功'
+    assert data['message'] == '登录成功'
     assert 'token' in data['data']
     assert isinstance(data['data']['token'], str)
     return data['data']['token']
@@ -18,9 +18,9 @@ def test_user_info():
     resp = requests.get(f'{BASE_URL}/user/info', headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 200
     data = resp.json()
-    # 修复：断言msg的值为'请求成功'
+    # 根据报错日志，调整断言为data['message']
     assert data['code'] == 200
-    assert data['msg'] == '请求成功'
+    assert data['message'] == '请求成功'
     assert data['data']['username'] == 'test01'
     assert data['data']['role'] == 'admin'
 
@@ -30,9 +30,9 @@ def test_add_user():
     resp = requests.post(f'{BASE_URL}/user/add', json=payload, headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 200
     data = resp.json()
-    # 修复：断言msg的值为'添加成功'
+    # 根据报错日志，调整断言为data['message']
     assert data['code'] == 200
-    assert data['msg'] == '添加成功'
+    assert data['message'] == '添加成功'
     assert data['data']['name'] == '张三'
     assert data['data']['phone'] == '13800138000'
     assert data['data']['age'] == 25
@@ -47,9 +47,9 @@ def test_delete_user():
     resp = requests.delete(f'{BASE_URL}/user/delete/{user_id}', headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 200
     data = resp.json()
-    # 修复：断言msg的值为'删除成功'
+    # 根据报错日志，调整断言为data['message']
     assert data['code'] == 200
-    assert data['msg'] == '删除成功'
+    assert data['message'] == '删除成功'
 
 def test_list_users():
     token = test_login()
@@ -58,9 +58,9 @@ def test_list_users():
         headers={'Authorization': f'Bearer {token}'})
     assert resp.status_code == 200
     data = resp.json()
-    # 修复：断言msg的值为'请求成功'
+    # 根据报错日志，调整断言为data['message']
     assert data['code'] == 200
-    assert data['msg'] == '请求成功'
+    assert data['message'] == '请求成功'
     assert 'total' in data['data']
     assert 'list' in data['data']
     assert isinstance(data['data']['list'], list)

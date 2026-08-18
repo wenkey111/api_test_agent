@@ -228,9 +228,11 @@ def finish_node(state: AgentState):
                 except Exception:
                     continue
 
-    # 统计用例
-    passed_cases = len(re.findall(r"PASSED", stdout))
-    failed_cases = len(re.findall(r"FAILED", stdout))
+    # 统计用例：从 pytest summary 行提取（避免 -v 输出中 FAILED 出现2次导致重复计数）
+    m_passed = re.search(r"(\d+)\s+passed", stdout)
+    m_failed = re.search(r"(\d+)\s+failed", stdout)
+    passed_cases = int(m_passed.group(1)) if m_passed else 0
+    failed_cases = int(m_failed.group(1)) if m_failed else 0
     total = passed_cases + failed_cases
     pass_rate = f"{(passed_cases / total * 100):.1f}%" if total > 0 else "N/A"
     status = "✅ 全部通过" if passed else ("❌ 重试耗尽" if retry_count >= 3 else "❌ 存在失败")

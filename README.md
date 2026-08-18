@@ -127,7 +127,38 @@ streamlit run final_agent.py
 
 ---
 
-## 可观测性（LangSmith）
+## 数据持久化与可观测性
+
+### SQLite 双层持久化（`multi_agent_memory.sqlite`）
+
+| 层 | 表 | 写入位置 | 用途 |
+|:---|:---|:---|:---|
+| **LangGraph Checkpoint** | `checkpoints` / `writes`（框架内部表） | [agents/graph.py#L97](agents/graph.py) | 按 `thread_id` 存储会话状态，支持断点续跑与 `Clear History` 重置会话 |
+| **业务历史** | `test_history` | [agents/supervisor.py#L269](agents/supervisor.py)（`finish_node`） | 每次完整自愈流程的最终结果（1 条/次运行） |
+| **自愈快照** | `self_heal_rounds` | [agents/supervisor.py#L47](agents/supervisor.py)（`_persist_self_heal_round`） | 每轮自愈的中间快照（N 条/次运行，N=retry_count+1） |
+
+`test_history` 表字段：`created_at` / `status` / `retry_count` / `passed_cases` / `failed_cases` / `total` / `pass_rate` / `execution_result` / `test_code` / `report`
+
+查看示例：
+
+```bash
+sqlite3 multi_agent_memory.sqlite
+sqlite> .headers on
+sqlite> .mode column
+sqlite> SELECT id, created_at, status, retry_count, passed_cases, failed_cases FROM test_history ORDER BY id DESC LIMIT 10;
+```
+
+### 三套可观测手段对比
+
+| 手段 | 看什么 | 存哪 | 保留时长 |
+|:---|:---|:---|:---|
+| **Streamlit UI** | 实时进度（路由 / 工具调用 / 自愈计数） | 内存 | 刷新即丢 |
+| **LangSmith** | LLM 调用细节（prompt / response / tool_calls / token） | 云端 | 永久（云端） |
+| **SQLite** | 业务结果 + 每轮快照 | 本地 `multi_agent_memory.sqlite` | 永久（本地） |
+
+三者互补：UI 看现在，LangSmith 看细节，SQLite 看历史。
+
+### LangSmith 接入
 
 ```bash
 set LANGCHAIN_TRACING_V2=true
@@ -135,6 +166,8 @@ set LANGCHAIN_API_KEY=your-api-key
 ```
 
 可视化 Supervisor 路由决策链与 Worker 工具调用链。
+
+默认在 tracing 的 default 项目下查看，可自行建项目并加上 `set LANGCHAIN_PROJECT=你的项目名`。
 
 ---
 
@@ -144,13 +177,8 @@ Python · LangGraph · LangChain · MCP 协议 · Ollama (llama3.1) · FastMCP �
 
 ---
 
-## 安全扫描（Semgrep Skill）
+## Skills
 
-项目内嵌 Claude Code Skill `.claude/skills/semgrep-scan/`，运行 Semgrep Pro SAST 扫描并生成 HTML 报告：
+skill 文件夹仅为结构需要，可自行添加配置。
 
-```
-/semgrep-scan
-/semgrep-scan --config p/owasp-top-ten
-```
-
-Skill 只读，不修改源码。
+`CLAUDE.md` 是接入 Claude Code（claude.ai/code）作为开发助手时的参考文档，包含架构概览、关键设计模式、安全护栏与路径注意事项。若使用 Claude Code 修改本项目，建议先阅读该文件；不使用 Claude Code 可忽略。
