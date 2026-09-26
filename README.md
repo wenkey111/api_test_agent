@@ -139,13 +139,46 @@ streamlit run final_agent.py
 
 `test_history` 表字段：`created_at` / `status` / `retry_count` / `passed_cases` / `failed_cases` / `total` / `pass_rate` / `execution_result` / `test_code` / `report`
 
+`self_heal_rounds` 表字段：`created_at` / `round_type` / `requirement` / `test_code` / `execution_result` / `passed` / `retry_count` / `stdout` / `stderr` / `error`
+
+其中 `round_type` 取值与写入时机：
+
+| `round_type` | 写入时机 | 用途 |
+|:---|:---|:---|
+| `exec_result` | SandboxExecWorker 执行完后、self_heal_check 判断前 | 记录"本轮执行结果"快照 |
+| `retry` | self_heal_check 决定 RETRY 时 | 记录"即将进入修复轮"的快照（修复前代码） |
+| `finish` | finish_node 终止时 | 记录最终状态 |
+
 查看示例：
 
 ```bash
 sqlite3 multi_agent_memory.sqlite
 sqlite> .headers on
 sqlite> .mode column
+
+-- 查看 test_history（每次完整流程的最终结果）
 sqlite> SELECT id, created_at, status, retry_count, passed_cases, failed_cases FROM test_history ORDER BY id DESC LIMIT 10;
+
+-- 查看 self_heal_rounds（每一轮中间快照，按时间倒序）
+sqlite> SELECT id, created_at, round_type, passed, retry_count FROM self_heal_rounds ORDER BY id DESC;
+
+-- 对比每轮 retry 的代码变化（看 LLM 改了什么）
+sqlite> SELECT retry_count, round_type, test_code FROM self_heal_rounds WHERE round_type IN ('retry','finish') ORDER BY id ASC;
+
+-- 查看失败轮的完整 stderr（定位失败原因）
+sqlite> SELECT retry_count, stderr FROM self_heal_rounds WHERE passed = 0 ORDER BY id DESC LIMIT 3;
+```
+
+一行命令直接查（不进 shell）：
+
+```bash
+sqlite3 multi_agent_memory.sqlite "SELECT id, created_at, round_type, passed, retry_count FROM self_heal_rounds ORDER BY id DESC LIMIT 20;"
+```
+
+调试前清空两张表（跑一次干净的 demo）：
+
+```bash
+sqlite3 multi_agent_memory.sqlite "DELETE FROM self_heal_rounds; DELETE FROM test_history;"
 ```
 
 ### 三套可观测手段对比
